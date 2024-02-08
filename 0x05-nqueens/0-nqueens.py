@@ -1,64 +1,54 @@
 #!/usr/bin/python3
-"""Backtracking algo solution for NQueens problem"""
+"""
+N queens
+"""
 
 import sys
 
+if len(sys.argv) != 2:
+    print('Usage: nqueens N')
+    exit(1)
 
-class Nqueens:
-    """A class containing the solution to the Nqueen problem"""
-    def SolveNqueens(self, n):
-        """Contains the solution method and all the core data and
-        algorithms"""
-        column = []
-        positiveDiagonal = set()  # row + column is constant
-        negativeDiagonal = set()  # row - column is constant
-        row = []
+try:
+    n_q = int(sys.argv[1])
+except ValueError:
+    print('N must ba a number')
+    exit(1)
 
-        res = []
-
-        def is_valid(r, c):
-            """Checks if the current position is valid to place a queen"""
-            return c not in column and (r + c) not in positiveDiagonal \
-                and (r - c) not in negativeDiagonal
-
-        def backtrack(r):
-            """The backtracking algo that checks if
-            the queen is already on that given row and
-            positiveDiagonal or negativeDiagonal then
-            discarding that position recursively"""
-            if r == n:
-                res.append([[row[i], column[i]] for i in range(n)])
-                return
-
-            for c in range(n):
-                if is_valid(r, c):
-                    column.append(c)
-                    row.append(r)
-                    positiveDiagonal.add(r + c)
-                    negativeDiagonal.add(r - c)
-
-                    backtrack(r + 1)
-
-                    column.pop()
-                    row.pop()
-                    positiveDiagonal.remove(r + c)
-                    negativeDiagonal.remove(r - c)
-
-        backtrack(0)
-
-        for solution in res:
-            print(solution)
+if n_q < 4:
+    print('N must ba at least 4')
+    exit(1)
 
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: nqueens N")
-        sys.exit(1)
-    solution = Nqueens()
-    if not sys.argv[1].isnumeric():
-        print("N must be a number")
-        sys.exit(1)
-    if int(sys.argv[1]) < 4:
-        print("N must be at least 4")
-        sys.exit(1)
-    solution.SolveNqueens(int(sys.argv[1]))
+def solve_nqueens(n):
+    ''' self descriptive '''
+    if n == 0:
+        return [[]]
+    inner_solution = solve_nqueens(n - 1)
+    return [solution + [(n, i + 1)]
+            for i in range(n_q)
+            for solution in inner_solution
+            if safe_queen((n, i + 1), solution)]
+
+
+def attack_queen(square, queen):
+    '''self descriptive'''
+    (row1, col1) = square
+    (row2, col2) = queen
+    return (row1 == row2) or (col1 == col2) or\
+        abs(row1 - row2) == abs(col1 - col2)
+
+
+def safe_queen(sqr, queens):
+    '''self descriptive'''
+    for queen in queens:
+        if attack_queen(sqr, queen):
+            return False
+    return True
+
+
+for answer in reversed(solve_nqueens(n_q)):
+    result = []
+    for p in [list(p) for p in answer]:
+        result.append([i - 1 for i in p])
+    print(result)
